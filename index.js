@@ -160,6 +160,9 @@ Q.deferred = Q.pending = Q.defer;
 
 var reflect = Promise.reflect;
 var map = Promise.map;
+
+Promise.prototype.valueOf = Promise.prototype.value;
+
 Promise.prototype.allSettled = function() {
     return map(reflect(this), bluebirdInspectionToQInspection);
 };
