@@ -330,10 +330,9 @@ Promise.prototype.done = function (fulfilled, rejected, progress) {
                 throw error;
             }
         };
-        if (scheduler.isStatic === true) {
-        	scheduler(errorHandler)();
-    	} else {
-        	scheduler(errorHandler);
+        var sheduled = scheduler(errorHandler);
+        if (scheduler.isStatic === true && typeof sheduled === "function") {
+        	sheduled();
     	}
     };
 
