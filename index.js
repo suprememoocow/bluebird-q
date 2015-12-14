@@ -158,14 +158,14 @@ Q.defer = function() {
 Q.deferred = Q.pending = Q.defer;
 
 
-var settle = Promise.settle;
+var reflect = Promise.reflect;
 var map = Promise.map;
 Promise.prototype.allSettled = function() {
-    return map(settle(this), bluebirdInspectionToQInspection);
+    return map(reflect(this), bluebirdInspectionToQInspection);
 };
 
 Promise.prototype.allResolved = function() {
-    return map(settle(this), function(i) {
+    return map(reflect(this), function(i) {
         if (i.isFulfilled()) return Q(i.value());
         if (i.isRejected()) return Q.reject(i.reason());
     });
