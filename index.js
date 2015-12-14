@@ -157,21 +157,15 @@ Q.defer = function() {
 };
 Q.deferred = Q.pending = Q.defer;
 
-Q.getBluebirdPromise = function() {
-	return Promise;
-};
 
-var reflect = Promise.reflect;
+var settle = Promise.settle;
 var map = Promise.map;
-
-Promise.prototype.valueOf = Promise.prototype.value;
-
 Promise.prototype.allSettled = function() {
-    return map(reflect(this), bluebirdInspectionToQInspection);
+    return map(settle(this), bluebirdInspectionToQInspection);
 };
 
 Promise.prototype.allResolved = function() {
-    return map(reflect(this), function(i) {
+    return map(settle(this), function(i) {
         if (i.isFulfilled()) return Q(i.value());
         if (i.isRejected()) return Q.reject(i.reason());
     });
@@ -322,18 +316,14 @@ Promise.prototype.done = function (fulfilled, rejected, progress) {
         // forward to a future turn so that ``when``
         // does not catch it and turn it into a rejection.
         var onerror = Q.onerror;
-        var errorHandler = function () {
+        scheduler(function () {
             promise._attachExtraTrace(error);
             if (onerror) {
                 onerror(error);
             } else {
                 throw error;
             }
-        };
-        var sheduled = scheduler(errorHandler);
-        if (scheduler.isStatic === true && typeof sheduled === "function") {
-        	sheduled();
-    	}
+        });
     };
 
     // Avoid unnecessary `nextTick`ing via an unnecessary `when`.
