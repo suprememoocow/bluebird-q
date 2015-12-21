@@ -44,6 +44,8 @@ var staticAliasMap = {
     async: "coroutine",
     spawn: "spawn",
     delay: "delay",
+    allResolved: "allResolved",
+    allSettled: "allSettled",
 
     timeout: INSTANCE,
     join: INSTANCE,
@@ -60,8 +62,6 @@ var staticAliasMap = {
     'delete': INSTANCE,
     'try': INSTANCE,
     keys: INSTANCE,
-    allResolved: INSTANCE,
-    allSettled: INSTANCE,
     fail: INSTANCE,
     "catch": INSTANCE,
     fin: INSTANCE,
@@ -158,17 +158,21 @@ Q.defer = function() {
 Q.deferred = Q.pending = Q.defer;
 
 
-var settle = Promise.settle;
 var map = Promise.map;
-Promise.prototype.allSettled = function() {
-    return map(settle(this), bluebirdInspectionToQInspection);
+var reflect = Promise.prototype.reflect;
+
+Promise.allSettled = function(array) {
+    return Promise.all(array.map(function(promise) {
+        return bluebirdInspectionToQInspection(reflect.apply(promise));
+    }));
 };
 
-Promise.prototype.allResolved = function() {
-    return map(settle(this), function(i) {
+Promise.allResolved = function(array) {
+    return Promise.all(array.map(function(promise) {
+        var i = reflect.apply(promise);
         if (i.isFulfilled()) return Q(i.value());
         if (i.isRejected()) return Q.reject(i.reason());
-    });
+    }));
 };
 
 Promise.prototype.join = function (that) {
